@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Burutha Shop POS</title>
+  <style>
+    @keyframes rotateArtifact {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3fdf3;
+      color: #2e7d32;
+      margin: 0;
+      padding: 0;
+    }
+    header, footer {
+      background-color: #2e7d32;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+    }
+    .menu {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .menu button {
+      background-color: white;
+      border: 2px solid #2e7d32;
+      color: #2e7d32;
+      padding: 10px 20px;
+      margin: 0 10px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .menu button:hover {
+      background-color: #2e7d32;
+      color: white;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    .total {
+      text-align: right;
+      font-size: 20px;
+      margin-top: 20px;
+    }
+    .btn {
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      margin: 5px;
+      border-radius: 5px;
+    }
+    .btn:hover {
+      background-color: #1b5e20;
+    }
+    .welcome {
+      text-align: center;
+      margin-top: 40px;
+    }
+    .artifact {
+      width: 150px;
+      height: 150px;
+      margin: 20px auto;
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/6/61/Lankathilaka_vihara_02.jpg');
+      background-size: cover;
+      background-position: center;
+      border-radius: 50%;
+      animation: rotateArtifact 10s linear infinite;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Burutha Shop POS</h1>
+  </header>
+
+  <div class="welcome" id="welcomeScreen">
+    <div class="artifact"></div>
+    <h2>Welcome to Burutha Shop</h2>
+    <p>Your trusted grocery store with Sri Lankan heritage</p>
+    <div class="menu">
+      <button onclick="startPOS()">Start POS</button>
+    </div>
+  </div>
+
+  <div class="container" id="pos" style="display:none">
+    <h2>Point of Sale</h2>
+    <input type="text" id="itemName" placeholder="Item Name">
+    <input type="number" id="itemPrice" placeholder="Price">
+    <input type="number" id="itemQty" placeholder="Quantity">
+    <button class="btn" onclick="addItem()">Add Item</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Price</th>
+          <th>Qty</th>
+          <th>Total</th>
+          <th>Remove</th>
+        </tr>
+      </thead>
+      <tbody id="itemList"></tbody>
+    </table>
+
+    <div class="total" id="totalPrice">Total: Rs. 0.00</div>
+    <button class="btn" onclick="checkout()">Checkout</button>
+    <button class="btn" onclick="printReceipt()">Print Receipt</button>
+  </div>
+
+  <footer>
+    <p>Burutha Shop POS &copy; 2025</p>
+  </footer>
+
+  <script>
+    let items = [];
+
+    function startPOS() {
+      document.getElementById('welcomeScreen').style.display = 'none';
+      document.getElementById('pos').style.display = 'block';
+    }
+
+    function addItem() {
+      const name = document.getElementById('itemName').value;
+      const price = parseFloat(document.getElementById('itemPrice').value);
+      const qty = parseInt(document.getElementById('itemQty').value);
+
+      if (name && !isNaN(price) && !isNaN(qty)) {
+        items.push({ name, price, qty });
+        updateTable();
+        document.getElementById('itemName').value = '';
+        document.getElementById('itemPrice').value = '';
+        document.getElementById('itemQty').value = '';
+      }
+    }
+
+    function updateTable() {
+      const tbody = document.getElementById('itemList');
+      tbody.innerHTML = '';
+      let total = 0;
+      items.forEach((item, index) => {
+        const row = `<tr>
+          <td>${item.name}</td>
+          <td>Rs. ${item.price.toFixed(2)}</td>
+          <td>${item.qty}</td>
+          <td>Rs. ${(item.price * item.qty).toFixed(2)}</td>
+          <td><button class='btn' onclick="removeItem(${index})">Remove</button></td>
+        </tr>`;
+        total += item.price * item.qty;
+        tbody.innerHTML += row;
+      });
+      document.getElementById('totalPrice').innerText = `Total: Rs. ${total.toFixed(2)}`;
+    }
+
+    function removeItem(index) {
+      items.splice(index, 1);
+      updateTable();
+    }
+
+    function checkout() {
+      if (items.length === 0) {
+        alert('No items to checkout.');
+        return;
+      }
+      alert('Checkout complete. Please print the receipt.');
+    }
+
+    function printReceipt() {
+      if (items.length === 0) {
+        alert('Nothing to print.');
+        return;
+      }
+      window.print();
+    }
+  </script>
+</body>
+</html>
