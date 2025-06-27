@@ -1,0 +1,1 @@
+# burutha-shop-pos
