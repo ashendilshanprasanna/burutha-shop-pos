@@ -9,7 +9,6 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
     body {
       font-family: Arial, sans-serif;
       background-color: #f3fdf3;
@@ -27,13 +26,14 @@
       display: flex;
       justify-content: center;
       margin: 20px 0;
+      flex-wrap: wrap;
     }
     .menu button {
       background-color: white;
       border: 2px solid #2e7d32;
       color: #2e7d32;
       padding: 10px 20px;
-      margin: 0 10px;
+      margin: 10px;
       cursor: pointer;
       border-radius: 5px;
     }
@@ -42,7 +42,7 @@
       color: white;
     }
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: auto;
       padding: 20px;
       background-color: white;
@@ -90,6 +90,25 @@
       border-radius: 50%;
       animation: rotateArtifact 10s linear infinite;
     }
+    #dashboard {
+      display: none;
+      margin-top: 40px;
+    }
+    .stats-box {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .stats-box div {
+      background: #e8f5e9;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px #ccc;
+      width: 250px;
+      text-align: center;
+      margin: 10px;
+    }
   </style>
 </head>
 <body>
@@ -103,6 +122,7 @@
     <p>Your trusted grocery store with Sri Lankan heritage</p>
     <div class="menu">
       <button onclick="startPOS()">Start POS</button>
+      <button onclick="showDashboard()">View Dashboard</button>
     </div>
   </div>
 
@@ -131,16 +151,48 @@
     <button class="btn" onclick="printReceipt()">Print Receipt</button>
   </div>
 
+  <div class="container" id="dashboard">
+    <h2>Sales Dashboard</h2>
+    <div class="stats-box">
+      <div>
+        <h3>Total Sales</h3>
+        <p id="dashboardTotal">Rs. 0.00</p>
+      </div>
+      <div>
+        <h3>Total Items Sold</h3>
+        <p id="dashboardItems">0</p>
+      </div>
+      <div>
+        <h3>Transactions</h3>
+        <p id="dashboardOrders">0</p>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <p>Burutha Shop POS &copy; 2025</p>
   </footer>
 
   <script>
     let items = [];
+    let totalSales = 0;
+    let totalItemsSold = 0;
+    let totalOrders = 0;
 
     function startPOS() {
       document.getElementById('welcomeScreen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'none';
       document.getElementById('pos').style.display = 'block';
+    }
+
+    function showDashboard() {
+      document.getElementById('welcomeScreen').style.display = 'none';
+      document.getElementById('pos').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+
+      document.getElementById('dashboardTotal').innerText = `Rs. ${totalSales.toFixed(2)}`;
+      document.getElementById('dashboardItems').innerText = totalItemsSold;
+      document.getElementById('dashboardOrders').innerText = totalOrders;
     }
 
     function addItem() {
@@ -170,7 +222,15 @@
           <td><button class='btn' onclick="removeItem(${index})">Remove</button></td>
         </tr>`;
         total += item.price * item.qty;
-        tbody.innerHTML += row;
+      });
+      items.forEach((item, index) => {
+        tbody.innerHTML += `<tr>
+          <td>${item.name}</td>
+          <td>Rs. ${item.price.toFixed(2)}</td>
+          <td>${item.qty}</td>
+          <td>Rs. ${(item.price * item.qty).toFixed(2)}</td>
+          <td><button class='btn' onclick="removeItem(${index})">Remove</button></td>
+        </tr>`;
       });
       document.getElementById('totalPrice').innerText = `Total: Rs. ${total.toFixed(2)}`;
     }
@@ -185,7 +245,18 @@
         alert('No items to checkout.');
         return;
       }
-      alert('Checkout complete. Please print the receipt.');
+      let total = 0;
+      let totalQty = 0;
+      items.forEach(item => {
+        total += item.price * item.qty;
+        totalQty += item.qty;
+      });
+      totalSales += total;
+      totalItemsSold += totalQty;
+      totalOrders++;
+      alert(`Checkout complete. Total: Rs. ${total.toFixed(2)}`);
+      items = [];
+      updateTable();
     }
 
     function printReceipt() {
